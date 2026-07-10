@@ -40,8 +40,8 @@ jobs:
 
       - name: Validate Docker
         run: |
-          docker --version
-          docker compose version
+          sudo docker --version
+          sudo docker compose version
         working-directory: .
 
       - name: Prepare runtime env
@@ -54,7 +54,7 @@ jobs:
         working-directory: .
 
       - name: Build and restart stack
-        run: docker compose up -d --build --remove-orphans
+        run: sudo docker compose up -d --build --remove-orphans
         working-directory: .
 
       - name: Smoke check
