@@ -44,6 +44,15 @@ jobs:
           docker compose version
         working-directory: .
 
+      - name: Prepare runtime env
+        run: |
+          if [ -f /opt/braintrust/infra/.env ]; then
+            cp /opt/braintrust/infra/.env .env
+          else
+            cp .env.example .env
+          fi
+        working-directory: .
+
       - name: Build and restart stack
         run: docker compose up -d --build --remove-orphans
         working-directory: .
