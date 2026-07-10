@@ -1,0 +1,13 @@
+tunnel: braintrust-dev
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  - hostname: braintrust-api.example.com
+    service: http://host.docker.internal:8001
+  - hostname: braintrust-mcp.example.com
+    service: http://host.docker.internal:8000
+  - hostname: braintrust-kafka.example.com
+    service: http://host.docker.internal:8080
+  - hostname: braintrust-neo4j.example.com
+    service: http://host.docker.internal:7474
+  - service: http_status:404

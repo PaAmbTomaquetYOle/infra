@@ -1,0 +1,59 @@
+name: Deploy Dev Stack
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - feat/hackathon-dev-stack
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout infra
+        uses: actions/checkout@v4
+        with:
+          path: infra
+
+      - name: Checkout slack-agent
+        uses: actions/checkout@v4
+        with:
+          repository: PaAmbTomaquetYOle/slack-agent
+          ref: feat/hackathon-dev-stack
+          path: slack-agent
+          token: ${{ secrets.ORG_REPO_READ_TOKEN }}
+
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          repository: PaAmbTomaquetYOle/backend
+          ref: feat/hackathon-dev-stack
+          path: backend
+          token: ${{ secrets.ORG_REPO_READ_TOKEN }}
+
+      - name: Checkout mcp-server
+        uses: actions/checkout@v4
+        with:
+          repository: PaAmbTomaquetYOle/mcp-server
+          ref: feat/hackathon-dev-stack
+          path: mcp-server
+          token: ${{ secrets.ORG_REPO_READ_TOKEN }}
+
+      - name: Validate Docker
+        run: |
+          docker --version
+          docker compose version
+        working-directory: infra
+
+      - name: Build and restart stack
+        run: docker compose up -d --build --remove-orphans
+        working-directory: infra
+
+      - name: Smoke check
+        shell: pwsh
+        run: ./scripts/smoke-check.ps1
+        working-directory: infra

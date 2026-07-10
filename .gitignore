@@ -1,0 +1,3 @@
+.env
+.cloudflared/
+cloudflared/credentials.json

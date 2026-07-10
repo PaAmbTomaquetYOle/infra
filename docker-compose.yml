@@ -1,0 +1,136 @@
+name: braintrust
+
+services:
+  slack-agent:
+    build:
+      context: ../slack-agent
+    env_file:
+      - ./.env
+    environment:
+      PORT: ${SLACK_AGENT_PORT:-3000}
+      MCP_SERVER_URL: http://mcp-server:${MCP_SERVER_PORT:-8000}/mcp
+      BACKEND_API_URL: http://backend:${BACKEND_PORT:-8001}/api/v1
+      KAFKA_BROKERS: kafka:${KAFKA_PORT:-9092}
+    ports:
+      - "${SLACK_AGENT_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+      mcp-server:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >
+          fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+    env_file:
+      - ./.env
+    environment:
+      PORT: ${BACKEND_PORT:-8001}
+      POSTGRES_DSN: postgresql://${POSTGRES_USER:-braintrust}:${POSTGRES_PASSWORD:-braintrust}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-braintrust}
+      NEO4J_URI: bolt://neo4j:${NEO4J_BOLT_PORT:-7687}
+    ports:
+      - "${BACKEND_PORT:-8001}:8001"
+    depends_on:
+      postgres:
+        condition: service_started
+      neo4j:
+        condition: service_started
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >
+          import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health')
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  mcp-server:
+    build:
+      context: ../mcp-server
+    env_file:
+      - ./.env
+    environment:
+      HOST: 0.0.0.0
+      PORT: ${MCP_SERVER_PORT:-8000}
+    ports:
+      - "${MCP_SERVER_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >
+          import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: apache/kafka:3.9.0
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID:-braintrust-kraft-cluster}
+    ports:
+      - "${KAFKA_PORT:-9092}:9092"
+      - "${KAFKA_CONTROLLER_PORT:-9093}:9093"
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      kafka:
+        condition: service_started
+    environment:
+      KAFKA_CLUSTERS_0_NAME: braintrust
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - "${KAFKA_UI_PORT:-8080}:8080"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-braintrust}
+      POSTGRES_USER: ${POSTGRES_USER:-braintrust}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-braintrust}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  neo4j:
+    image: neo4j:5
+    environment:
+      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-braintrust}
+    ports:
+      - "${NEO4J_HTTP_PORT:-7474}:7474"
+      - "${NEO4J_BOLT_PORT:-7687}:7687"
+    volumes:
+      - neo4j-data:/data
+
+volumes:
+  postgres-data:
+  neo4j-data:
