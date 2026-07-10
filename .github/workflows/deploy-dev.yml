@@ -65,6 +65,8 @@ jobs:
         working-directory: .
 
       - name: Smoke check
-        shell: pwsh
-        run: ./scripts/smoke-check.ps1
+        run: |
+          curl --fail --silent http://localhost:3000/health > /dev/null
+          curl --fail --silent http://localhost:8000/health > /dev/null
+          curl --fail --silent http://localhost:8001/health > /dev/null
         working-directory: .
