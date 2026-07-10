@@ -44,13 +44,13 @@ jobs:
         run: |
           docker --version
           docker compose version
-        working-directory: infra
+        working-directory: .
 
       - name: Build and restart stack
         run: docker compose up -d --build --remove-orphans
-        working-directory: infra
+        working-directory: .
 
       - name: Smoke check
         shell: pwsh
         run: ./scripts/smoke-check.ps1
-        working-directory: infra
+        working-directory: .
