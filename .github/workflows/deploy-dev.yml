@@ -38,6 +38,13 @@ jobs:
           ref: feat/hackathon-dev-stack
           path: mcp-server
 
+      - name: Normalize workspace layout
+        run: |
+          mv slack-agent ../slack-agent
+          mv backend ../backend
+          mv mcp-server ../mcp-server
+        working-directory: .
+
       - name: Validate Docker
         run: |
           sudo docker --version
