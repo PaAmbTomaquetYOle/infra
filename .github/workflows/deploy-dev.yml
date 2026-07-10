@@ -25,7 +25,6 @@ jobs:
           repository: PaAmbTomaquetYOle/slack-agent
           ref: feat/hackathon-dev-stack
           path: slack-agent
-          token: ${{ secrets.ORG_REPO_READ_TOKEN }}
 
       - name: Checkout backend
         uses: actions/checkout@v4
@@ -33,7 +32,6 @@ jobs:
           repository: PaAmbTomaquetYOle/backend
           ref: feat/hackathon-dev-stack
           path: backend
-          token: ${{ secrets.ORG_REPO_READ_TOKEN }}
 
       - name: Checkout mcp-server
         uses: actions/checkout@v4
@@ -41,7 +39,6 @@ jobs:
           repository: PaAmbTomaquetYOle/mcp-server
           ref: feat/hackathon-dev-stack
           path: mcp-server
-          token: ${{ secrets.ORG_REPO_READ_TOKEN }}
 
       - name: Validate Docker
         run: |
