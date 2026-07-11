@@ -43,6 +43,7 @@ PowerShell helpers:
 - This repo owns the shared deployment assets, not the application code.
 - Cross-repo deployment workflow lives in `.github/workflows/deploy-dev.yml`.
 - Private org repos will need an infra repo secret named `ORG_REPO_READ_TOKEN`.
+- `cloudflared` should be managed by this Compose stack with `CLOUDFLARE_TUNNEL_TOKEN` set in `.env`.
 
 ## Proxmox and Zero Trust
 
