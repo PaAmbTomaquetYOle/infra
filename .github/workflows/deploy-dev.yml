@@ -65,8 +65,5 @@ jobs:
         working-directory: .
 
       - name: Smoke check
-        run: |
-          curl --fail --silent http://localhost:3000/health > /dev/null
-          curl --fail --silent http://localhost:8000/health > /dev/null
-          curl --fail --silent http://localhost:8001/api/v1/health > /dev/null
+        run: bash ./scripts/smoke-check.sh
         working-directory: .
