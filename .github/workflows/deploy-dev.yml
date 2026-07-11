@@ -39,6 +39,7 @@ jobs:
 
       - name: Normalize workspace layout
         run: |
+          rm -rf ../slack-agent ../backend ../mcp-server
           mv slack-agent ../slack-agent
           mv backend ../backend
           mv mcp-server ../mcp-server
