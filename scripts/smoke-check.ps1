@@ -15,7 +15,7 @@ function Assert-JsonHealth {
     Write-Host "$Name ok -> $Url"
 }
 
-Assert-JsonHealth -Name "backend" -Url "http://localhost:8001/health"
+Assert-JsonHealth -Name "backend" -Url "http://localhost:8001/api/v1/health"
 Assert-JsonHealth -Name "mcp-server" -Url "http://localhost:8000/health"
 Assert-JsonHealth -Name "slack-agent" -Url "http://localhost:3000/health"
 
