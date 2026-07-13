@@ -3,7 +3,7 @@ name: braintrust
 services:
   slack-agent:
     build:
-      context: ../slack-agent
+      context: ../offboard-me
     env_file:
       - ./.env
     environment:

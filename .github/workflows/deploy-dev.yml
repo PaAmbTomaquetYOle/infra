@@ -8,6 +8,7 @@ on:
   repository_dispatch:
     types:
       - slack-agent-updated
+      - offboard-me-updated
 
 permissions:
   contents: read
@@ -20,12 +21,12 @@ jobs:
       - name: Checkout infra
         uses: actions/checkout@v4
 
-      - name: Checkout slack-agent
+      - name: Checkout offboard-me
         uses: actions/checkout@v4
         with:
-          repository: PaAmbTomaquetYOle/slack-agent
+          repository: PaAmbTomaquetYOle/offboard-me
           ref: main
-          path: slack-agent
+          path: offboard-me
 
       - name: Checkout backend
         uses: actions/checkout@v4
@@ -43,8 +44,8 @@ jobs:
 
       - name: Normalize workspace layout
         run: |
-          rm -rf ../slack-agent ../backend ../mcp-server
-          mv slack-agent ../slack-agent
+          rm -rf ../offboard-me ../backend ../mcp-server
+          mv offboard-me ../offboard-me
           mv backend ../backend
           mv mcp-server ../mcp-server
         working-directory: .

@@ -15,7 +15,7 @@ This is the concrete follow-up for the current single-LXC setup at `172.16.0.172
 1. Push the `infra` repo and the `feat/hackathon-dev-stack` branch.
 2. Add this repo secret in GitHub:
    - `ORG_REPO_READ_TOKEN`
-   - scope: read access to `PaAmbTomaquetYOle/slack-agent`, `PaAmbTomaquetYOle/backend`, and `PaAmbTomaquetYOle/mcp-server`
+   - scope: read access to `PaAmbTomaquetYOle/offboard-me`, `PaAmbTomaquetYOle/backend`, and `PaAmbTomaquetYOle/mcp-server`
 3. In the `infra` repo, enable the workflow in `.github/workflows/deploy-dev.yml`.
 4. Make sure the runner has a stable working root:
    - recommended path: `/opt/github-runner-work`
