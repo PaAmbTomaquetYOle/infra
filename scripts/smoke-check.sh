@@ -21,8 +21,29 @@ wait_for_health() {
   return 1
 }
 
+wait_for_tcp_port() {
+  local name="$1"
+  local host="$2"
+  local port="$3"
+  local attempts="${4:-30}"
+  local sleep_seconds="${5:-2}"
+
+  for attempt in $(seq 1 "$attempts"); do
+    if timeout 2 bash -c "</dev/tcp/$host/$port" >/dev/null 2>&1; then
+      echo "$name ok -> $host:$port"
+      return 0
+    fi
+
+    echo "Waiting for $name ($attempt/$attempts) -> $host:$port"
+    sleep "$sleep_seconds"
+  done
+
+  echo "$name tcp check failed: $host:$port" >&2
+  return 1
+}
+
 wait_for_health "slack-agent" "http://localhost:3000/health"
-wait_for_health "mcp-server" "http://localhost:8000/health"
+wait_for_tcp_port "mcp-server" "localhost" "8000"
 wait_for_health "backend" "http://localhost:8001/api/v1/health"
 
 echo "BrainTrust infra smoke checks passed."
