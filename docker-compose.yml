@@ -20,6 +20,8 @@ services:
         condition: service_healthy
       kafka:
         condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
     healthcheck:
       test:
         - CMD
@@ -99,11 +101,55 @@ services:
       - "${KAFKA_PORT:-9092}:9092"
       - "${KAFKA_CONTROLLER_PORT:-9093}:9093"
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
+  kafka-init:
+    image: apache/kafka:3.9.0
     depends_on:
       kafka:
         condition: service_started
+    entrypoint:
+      - /bin/sh
+      - -c
+    command:
+      - >
+        until /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list >/dev/null 2>&1; do
+          echo "Waiting for Kafka...";
+          sleep 2;
+        done;
+        for topic in
+        slack-agent.offboarding.triggered
+        slack-agent.offboarding.cancellation_requested
+        slack-agent.interview.started
+        slack-agent.interview.completed
+        slack-agent.interview.turn_recorded
+        slack-agent.tasks.extracted
+        slack-agent.dossier.generation_requested
+        slack-agent.sop.creation_requested
+        slack-agent.sop.candidate_offered
+        slack-agent.sop.candidate_decided
+        slack-agent.knowledge_graph.interaction_registered
+        slack-agent.knowledge_graph.document_registered
+        slack-agent.knowledge_graph.channel_activity_registered
+        slack-agent.monthly_review.interview_completed
+        slack-agent.monthly_review.dossier_generation_requested
+        slack-agent.annual_review.interview_completed
+        slack-agent.annual_review.dossier_generation_requested
+        offboarding.offboarding.state_changed
+        offboarding.interview.completed
+        offboarding.dossier.generated
+        offboarding.offboarding.completed
+        offboarding.sop.created
+        offboarding.monthly_review.state_changed
+        offboarding.annual_review.state_changed
+        slack-agent.dlq;
+        do
+          /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic "$$topic" --partitions 1 --replication-factor 1;
+        done
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
     environment:
       KAFKA_CLUSTERS_0_NAME: braintrust
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
