@@ -3,11 +3,10 @@
 This repo is the source of truth for the shared development and deployment environment around:
 
 - `slack-agent`
-- `offboard-me`
 - `backend`
 - `mcp-server`
 
-It assumes those three repos stay separate and live as sibling directories during local development.
+It assumes those repos stay separate and live as sibling directories during local development.
 
 ## Local Stack
 
@@ -30,7 +29,6 @@ PowerShell helpers:
 ## Included services
 
 - `slack-agent`
-- `offboard-me`
 - `backend`
 - `mcp-server`
 - `kafka`
@@ -40,7 +38,7 @@ PowerShell helpers:
 
 ## Important Notes
 
-- `slack-agent` / `offboard-me` runs in `SLACK_AGENT_DRY_RUN=true` by default unless you replace the placeholder values in `.env`.
+- `slack-agent` runs in `SLACK_AGENT_DRY_RUN=true` by default unless you replace the placeholder values in `.env`.
 - `mcp-server` exposes a real MCP streamable HTTP endpoint at `http://localhost:8000/mcp`.
 - This repo owns the shared deployment assets, not the application code.
 - Cross-repo deployment workflow lives in `.github/workflows/deploy-dev.yml`.
