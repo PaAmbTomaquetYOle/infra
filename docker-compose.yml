@@ -9,7 +9,7 @@ services:
     environment:
       PORT: ${SLACK_AGENT_PORT:-3000}
       MCP_SERVER_URL: http://mcp-server:${MCP_SERVER_PORT:-8000}/mcp
-      BACKEND_API_URL: http://backend:${BACKEND_PORT:-8001}/api/v1
+      BACKEND_API_URL: http://backend:8888/api/v1
       KAFKA_BROKERS: kafka:${KAFKA_PORT:-9092}
     ports:
       - "${SLACK_AGENT_PORT:-3000}:3000"
@@ -37,11 +37,11 @@ services:
     env_file:
       - ./.env
     environment:
-      PORT: ${BACKEND_PORT:-8001}
+      PORT: 8888
       POSTGRES_DSN: postgresql://${POSTGRES_USER:-braintrust}:${POSTGRES_PASSWORD:-braintrust}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-braintrust}
       NEO4J_URI: bolt://neo4j:${NEO4J_BOLT_PORT:-7687}
     ports:
-      - "${BACKEND_PORT:-8001}:8001"
+      - "${BACKEND_PORT:-8001}:8888"
     depends_on:
       postgres:
         condition: service_started
@@ -53,7 +53,7 @@ services:
         - python
         - -c
         - >
-          import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/api/v1/health')
+          import urllib.request; urllib.request.urlopen('http://127.0.0.1:8888/api/v1/health')
       interval: 15s
       timeout: 5s
       retries: 5
