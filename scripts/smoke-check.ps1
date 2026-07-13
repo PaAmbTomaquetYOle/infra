@@ -30,8 +30,43 @@ function Assert-JsonHealth {
     }
 }
 
+function Assert-TcpPort {
+    param(
+        [string]$Name,
+        [string]$HostName,
+        [int]$Port,
+        [int]$Retries = 30,
+        [int]$DelaySeconds = 2
+    )
+
+    for ($attempt = 1; $attempt -le $Retries; $attempt++) {
+        $client = [System.Net.Sockets.TcpClient]::new()
+        try {
+            $connect = $client.BeginConnect($HostName, $Port, $null, $null)
+            if ($connect.AsyncWaitHandle.WaitOne([TimeSpan]::FromSeconds(2))) {
+                $client.EndConnect($connect)
+                Write-Host "$Name ok -> ${HostName}:$Port"
+                return
+            }
+
+            throw "$Name tcp check timed out."
+        }
+        catch {
+            if ($attempt -eq $Retries) {
+                throw
+            }
+
+            Write-Host "Waiting for $Name ($attempt/$Retries) -> ${HostName}:$Port"
+            Start-Sleep -Seconds $DelaySeconds
+        }
+        finally {
+            $client.Dispose()
+        }
+    }
+}
+
 Assert-JsonHealth -Name "backend" -Url "http://localhost:8001/api/v1/health"
-Assert-JsonHealth -Name "mcp-server" -Url "http://localhost:8000/health"
+Assert-TcpPort -Name "mcp-server" -HostName "localhost" -Port 8000
 Assert-JsonHealth -Name "slack-agent" -Url "http://localhost:3000/health"
 
 Write-Host "BrainTrust infra smoke checks passed."

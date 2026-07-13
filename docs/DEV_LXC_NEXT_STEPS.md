@@ -12,26 +12,21 @@ This is the concrete follow-up for the current single-LXC setup at `172.16.0.172
 
 ## What To Do Next
 
-1. Push the `infra` repo and the `feat/hackathon-dev-stack` branch.
-2. Add this repo secret in GitHub:
-   - `ORG_REPO_READ_TOKEN`
-   - scope: read access to `PaAmbTomaquetYOle/slack-agent`, `PaAmbTomaquetYOle/backend`, and `PaAmbTomaquetYOle/mcp-server`
-3. In the `infra` repo, enable the workflow in `.github/workflows/deploy-dev.yml`.
-4. Make sure the runner has a stable working root:
-   - recommended path: `/opt/github-runner-work`
-5. On the LXC, create or keep the runtime env file:
+1. Keep the four repos merged to `main`.
+2. Keep the self-hosted runner service active on the LXC.
+3. On the LXC, create or keep the runtime env file:
    - `/opt/braintrust/infra/.env`
-6. Configure the Cloudflare tunnel ingress rules so each hostname points to the matching local service.
-7. Trigger the deploy workflow manually once to validate checkout, build, and smoke checks.
+4. Configure the Cloudflare tunnel ingress rules so each hostname points to the matching Docker Compose service.
+5. Trigger the deploy workflow manually when a full rebuild is needed.
 
 ## Required Cloudflare Mapping
 
-- `braintrust-api.<domain>` -> `http://localhost:8001`
-- `braintrust-mcp.<domain>` -> `http://localhost:8000`
-- `braintrust-kafka.<domain>` -> `http://localhost:8080`
-- `braintrust-neo4j.<domain>` -> `http://localhost:7474`
+- `braintrust-api.<domain>` -> `http://backend:8888`
+- `braintrust-mcp.<domain>` -> `http://mcp-server:8000`
+- `braintrust-kafka.<domain>` -> `http://kafka-ui:8080`
+- `braintrust-neo4j.<domain>` -> `http://neo4j:7474`
 
-Keep Slack agent internal for now unless there is a clear external use case.
+Use HTTP for these Cloudflare service mappings. Keep Slack agent internal while Slack Socket Mode is enabled.
 
 ## Runtime Files On The LXC
 
@@ -47,8 +42,8 @@ After the workflow runs, validate:
 cd /opt/braintrust/infra
 docker compose ps
 curl http://localhost:3000/health
-curl http://localhost:8000/health
-curl http://localhost:8001/health
+timeout 2 bash -c '</dev/tcp/127.0.0.1/8000' && echo mcp-port-ok
+curl http://localhost:8001/api/v1/health
 ```
 
 ## Post-Hackathon Hardening

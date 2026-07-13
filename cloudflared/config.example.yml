@@ -3,11 +3,11 @@ credentials-file: /etc/cloudflared/credentials.json
 
 ingress:
   - hostname: braintrust-api.example.com
-    service: http://host.docker.internal:8001
+    service: http://backend:8888
   - hostname: braintrust-mcp.example.com
-    service: http://host.docker.internal:8000
+    service: http://mcp-server:8000
   - hostname: braintrust-kafka.example.com
-    service: http://host.docker.internal:8080
+    service: http://kafka-ui:8080
   - hostname: braintrust-neo4j.example.com
-    service: http://host.docker.internal:7474
+    service: http://neo4j:7474
   - service: http_status:404
